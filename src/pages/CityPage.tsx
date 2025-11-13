@@ -1,138 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import type { City, Country, Continent } from '../types';
-import { geoAPI } from '../services/api';
-import CityForm from '../components/forms/CityForm';
-import CityList from '../components/lists/CityList';
+import React from 'react';
 
 const CityPage: React.FC = () => {
-  const [cities, setCities] = useState<City[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [continents, setContinents] = useState<Continent[]>([]);
-  const [editingCity, setEditingCity] = useState<City | null>(null);
-  const [filterCountry, setFilterCountry] = useState<number | ''>('');
-  const [filterContinent, setFilterContinent] = useState<number | ''>('');
-
-  useEffect(() => {
-    loadCities();
-    loadCountries();
-    loadContinents();
-  }, []);
-
-  const loadCities = async () => {
-    try {
-      const response = await geoAPI.getCities();
-      setCities(response.data);
-    } catch (error) {
-      console.error('Erro ao carregar cidades:', error);
-    }
+  // Dados simulados de Paris (igual à imagem)
+  const cityData = {
+    name: "Paris",
+    country: "France",
+    population: "2.14M",
+    populationSub: "City Proper (2020)",
+    area: "105.4 km²",
+    areaSub: "40.7 sq mi",
+    weather: "19°C",
+    weatherSub: "Partly Cloudy",
+    timezone: "CET",
+    timezoneSub: "UTC+1",
+    language: "French",
+    imageUrl: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop" // Imagem de Paris
   };
-
-  const loadCountries = async () => {
-    try {
-      const response = await geoAPI.getCountries();
-      setCountries(response.data);
-    } catch (error) {
-      console.error('Erro ao carregar países:', error);
-    }
-  };
-
-  const loadContinents = async () => {
-    try {
-      const response = await geoAPI.getContinents();
-      setContinents(response.data);
-    } catch (error) {
-      console.error('Erro ao carregar continentes:', error);
-    }
-  };
-
-  const handleSave = async (city: Omit<City, 'id'>) => {
-    try {
-      if (editingCity) {
-        await geoAPI.updateCity(editingCity.id, city);
-      } else {
-        await geoAPI.createCity(city);
-      }
-      loadCities();
-      setEditingCity(null);
-    } catch (error) {
-      console.error('Erro ao salvar cidade:', error);
-    }
-  };
-
-  const handleEdit = (city: City) => {
-    setEditingCity(city);
-  };
-
-  const handleDelete = async (id: number) => {
-    try {
-      await geoAPI.deleteCity(id);
-      loadCities();
-    } catch (error) {
-      console.error('Erro ao deletar cidade:', error);
-    }
-  };
-
-  const filteredCities = cities.filter(city => {
-    const countryMatch = filterCountry ? city.country_id === Number(filterCountry) : true;
-    const continentMatch = filterContinent 
-      ? countries.find(country => country.id === city.country_id)?.continent_id === Number(filterContinent)
-      : true;
-    return countryMatch && continentMatch;
-  });
 
   return (
-    <div className="page">
-      <h1>Gerenciar Cidades</h1>
-      
-      <div className="filters">
-        <div className="form-group">
-          <label>Filtrar por País:</label>
-          <select 
-            value={filterCountry} 
-            onChange={(e) => setFilterCountry(e.target.value as number | '')}
-          >
-            <option value="">Todos os países</option>
-            {countries.map(country => (
-              <option key={country.id} value={country.id}>
-                {country.name}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="page-container">
+       {/* Breadcrumbs */}
+       <div className="breadcrumbs">
+        Home <span>/</span> Countries <span>/</span> {cityData.country} <span>/</span> <span className="current">{cityData.name}</span>
+      </div>
 
-        <div className="form-group">
-          <label>Filtrar por Continente:</label>
-          <select 
-            value={filterContinent} 
-            onChange={(e) => setFilterContinent(e.target.value as number | '')}
-          >
-            <option value="">Todos os continentes</option>
-            {continents.map(continent => (
-              <option key={continent.id} value={continent.id}>
-                {continent.name}
-              </option>
-            ))}
-          </select>
+      {/* Hero Section com Imagem de Fundo */}
+      <div 
+        className="city-hero" 
+        style={{ backgroundImage: `url(${cityData.imageUrl})` }}
+      >
+        <div className="city-hero-content">
+          <h1>{cityData.name}</h1>
+          <span>{cityData.country}</span>
         </div>
       </div>
-      
-      <div className="content-grid">
-        <div className="form-section">
-          <CityForm 
-            city={editingCity}
-            countries={countries}
-            onSave={handleSave}
-            onCancel={() => setEditingCity(null)}
-          />
+
+      {/* Abas de Navegação (Visual apenas) */}
+      <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
+        <span style={{ color: 'var(--primary-accent)', fontWeight: '600', borderBottom: '2px solid var(--primary-accent)', paddingBottom: '1rem', marginBottom: '-1.1rem' }}>Overview</span>
+        <span style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Demographics</span>
+        <span style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Points of Interest</span>
+        <span style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Weather</span>
+        <span style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Economy</span>
+      </div>
+
+      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Overview</h2>
+
+      {/* Grid de Estatísticas (Cards Escuros/Azuis) */}
+      <div className="city-stats-grid">
+        <div className="stat-box">
+          <div className="stat-box-header">👥 Population</div>
+          <div className="stat-box-value">{cityData.population}</div>
+          <div className="stat-box-sub">{cityData.populationSub}</div>
+        </div>
+
+        <div className="stat-box">
+          <div className="stat-box-header">📐 Area</div>
+          <div className="stat-box-value">{cityData.area}</div>
+          <div className="stat-box-sub">{cityData.areaSub}</div>
+        </div>
+
+        <div className="stat-box">
+          <div className="stat-box-header">⛅ Current Weather</div>
+          <div className="stat-box-value">{cityData.weather}</div>
+          <div className="stat-box-sub">{cityData.weatherSub} <br/> Feels like 18°C</div>
         </div>
         
-        <div className="list-section">
-          <CityList 
-            cities={filteredCities}
-            countries={countries}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+        <div className="stat-box">
+          <div className="stat-box-header">🕒 Timezone</div>
+          <div className="stat-box-value">{cityData.timezone}</div>
+          <div className="stat-box-sub">{cityData.timezoneSub}</div>
+        </div>
+        
+        <div className="stat-box">
+          <div className="stat-box-header">🗣️ Language</div>
+          <div className="stat-box-value">{cityData.language}</div>
+          <div className="stat-box-sub">Official Language</div>
+        </div>
+      </div>
+
+      {/* Seção do Mapa */}
+      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Location</h2>
+      <div className="map-container" style={{ height: '300px', minHeight: '300px', marginTop: '0' }}>
+        <div className="map-placeholder" style={{ 
+            backgroundImage: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Paris_map_transport_networks_points_of_interest.jpg/1200px-Paris_map_transport_networks_points_of_interest.jpg')", // Mapa estático de Paris
+            opacity: 0.8 
+        }}>
         </div>
       </div>
     </div>
