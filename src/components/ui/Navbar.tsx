@@ -1,22 +1,67 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // 1. Importar Link
+import { useLocation, Link } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
-return (
- <nav className="navbar">
-<div className="nav-brand">OrbX</div>
+  const location = useLocation();
+  
+  // Verifica se NÃO é uma página pública (Home/Login/Register).
+  const showFullNavbar = location.pathname !== '/' && 
+                         location.pathname !== '/login' && 
+                         location.pathname !== '/register';
 
-<div className="nav-search">
+  // Função auxiliar para destacar o link ativo
+  const getLinkClass = (path: string) => {
+    return location.pathname.startsWith(path) ? 'dash-link active' : 'dash-link';
+  };
 
-<span>🔍</span>
-<input type="text" placeholder="Search for a country or city..." />
-</div>
+  // === VERSÃO COMPLETA (Dashboard, Países, Cidades, Admin...) ===
+  if (showFullNavbar) {
+    return (
+      <nav className="dash-navbar">
+        <div className="dash-nav-left">
+          {/* Logo OrbX */}
+          <Link to="/dashboard" className="dash-brand" style={{ textDecoration: 'none' }}>
+            <div className="brand-icon"></div>
+            <span>OrbX</span>
+          </Link>
+          
+          {/* Menu de Navegação */}
+          <div className="dash-menu">
+            <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'dash-link active' : 'dash-link'}>Dashboard</Link> 
+            <Link to="/continents" className={getLinkClass('/continents')}>Continentes</Link> 
+            <Link to="/countries" className={getLinkClass('/countries')}>Países</Link> 
+            <Link to="/cities" className={getLinkClass('/cities')}>Cidades</Link> 
+            
+            {/* NOVO LINK ADICIONADO: */}
+            <Link to="/admin" className={getLinkClass('/admin')}>Admin Panel</Link>
+          </div>
+        </div>
 
-<div className="nav-icons">
-<Link to="/login" className="icon profile-icon">👤</Link> 
-</div>
-</nav>
-);
+        {/* Ícones da Direita */}
+        <div className="dash-nav-right">
+          <button className="nav-icon-btn">🔔</button>
+          <button className="nav-icon-btn">⚙️</button>
+          
+          <div className="nav-profile-avatar">
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  // === VERSÃO PADRÃO (Home/Login) ===
+  return (
+    <nav className="navbar">
+      <Link to="/" className="nav-brand" style={{ textDecoration: 'none' }}>
+        OrbX
+      </Link>
+      {location.pathname === '/' && (
+         <div style={{ marginLeft: 'auto' }}>
+            <Link to="/login" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 500 }}>Login</Link>
+         </div>
+      )}
+    </nav>
+  );
 };
 
 export default Navbar;
