@@ -1,32 +1,57 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // 1. Importe o useNavigate
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api'; 
 
 const Login: React.FC = () => {
-  const navigate = useNavigate(); // 2. Inicialize o hook
+  const navigate = useNavigate();
+  
+  // Estados para guardar o que o usuário digita
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); 
 
-  // 3. Função que lida com o envio do formulário
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault(); // Previne que a página recarregue
-    
-    navigate('/dashboard'); 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(''); // Limpa erros anteriores
+
+    try {
+      // 1. Envia dados para o backend
+      const response = await api.post('/auth/login', { email, password });
+      
+      // 2. Se deu certo, o back retorna { token, user }
+      const { token, user } = response.data;
+
+      // 3. Salva no navegador
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // 4. Redireciona para o Dashboard
+      navigate('/dashboard'); 
+    } catch (err: any) {
+      // Pega a mensagem de erro do backend ou define uma padrão
+      const msg = err.response?.data?.error || 'Falha ao entrar. Verifique seus dados.';
+      setError(msg);
+    }
   };
 
   return (
     <div className="login-container">
       <div className="login-form-wrapper">
-        {/* 4. Adicione o onSubmit aqui na tag form */}
         <form className="login-form" onSubmit={handleLogin}>
           <div className="nav-brand login-brand">OrbX</div>
           <h2>Acesse sua conta</h2>
           
+          {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input 
               type="email" 
               id="email" 
               className="form-input" 
-              placeholder="voce@exemplo.com" 
-              required // O navegador ainda vai exigir que pareça um email
+              value={email}
+              onChange={(e) => setEmail(e.target.value)} // Atualiza o estado
+              required 
             />
           </div>
           
@@ -36,8 +61,9 @@ const Login: React.FC = () => {
               type="password" 
               id="password" 
               className="form-input" 
-              placeholder="••••••••" 
-              required // Exige que não esteja vazio
+              value={password}
+              onChange={(e) => setPassword(e.target.value)} // Atualiza o estado
+              required 
             />
           </div>
           
