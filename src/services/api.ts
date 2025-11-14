@@ -1,36 +1,44 @@
 import axios from 'axios';
 
+// 1. Configura a URL base para a porta do seu Backend (3001)
 const api = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: 'http://localhost:3001', 
+});
+
+// 2. INTERCEPTOR: Antes de cada requisição, verifica se tem token e anexa no cabeçalho
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export const geoAPI = {
   // Continentes
-  getContinents: () => api.get('/continents'),
-  createContinent: (data: any) => api.post('/continents', data),
-  updateContinent: (id: number, data: any) => api.put(`/continents/${id}`, data),
-  deleteContinent: (id: number) => api.delete(`/continents/${id}`),
+  getContinents: () => api.get('/api/continents'),
+  createContinent: (data: any) => api.post('/api/continents', data),
+  deleteContinent: (id: number) => api.delete(`/api/continents/${id}`),
 
   // Países
-  getCountries: () => api.get('/countries'),
-  getCountriesByContinent: (continentId: number) => api.get(`/countries?continent=${continentId}`),
-  createCountry: (data: any) => api.post('/countries', data),
-  updateCountry: (id: number, data: any) => api.put(`/countries/${id}`, data),
-  deleteCountry: (id: number) => api.delete(`/countries/${id}`),
+  getCountries: (continentId?: number) => { 
+    // Se tiver ID, filtra, senão traz todos
+    return continentId 
+      ? api.get(`/api/countries?continent=${continentId}`) 
+      : api.get('/api/countries');
+  },
+  createCountry: (data: any) => api.post('/api/countries', data),
+  deleteCountry: (id: number) => api.delete(`/api/countries/${id}`), // Rota que precisamos garantir no back
 
   // Cidades
-  getCities: () => api.get('/cities'),
-  getCitiesByCountry: (countryId: number) => api.get(`/cities?country=${countryId}`),
-  createCity: (data: any) => api.post('/cities', data),
-  updateCity: (id: number, data: any) => api.put(`/cities/${id}`, data),
-  deleteCity: (id: number) => api.delete(`/cities/${id}`),
+  getCities: (filterId?: number, filterType?: 'country' | 'continent') => { 
+    if (filterType === 'country' && filterId) {
+      return api.get(`/api/cities?country=${filterId}`);
+    }
+    return api.get('/api/cities');
+  },
+  createCity: (data: any) => api.post('/api/cities', data),
 };
 
-// APIs Externas
-export const externalAPI = {
-  getCountryInfo: (countryName: string) => 
-    axios.get(`https://restcountries.com/v3.1/name/${countryName}`),
-  
-  getWeather: (lat: number, lon: number) =>
-    axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=SUA_CHAVE&units=metric`),
-};
+// Exporta a instância padrão para usar no Login/Register
+export default api;
