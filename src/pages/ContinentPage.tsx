@@ -15,12 +15,10 @@ const ContinentPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      {/* Breadcrumbs */}
       <div className="breadcrumbs">
         <span>Home</span> / <span>Continents</span> / <span className="current">Europe</span>
       </div>
 
-      {/* Header Section */}
       <div className="continent-header">
         <h1>Europe</h1>
         <p className="continent-desc">
@@ -28,13 +26,10 @@ const ContinentPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Main Grid Layout */}
       <div className="continent-content-grid">
         
-        {/* LEFT COLUMN: Stats & Map */}
         <div className="left-column">
           
-          {/* 4 Stat Cards */}
           <div className="stats-grid-2x2">
             <div className="stat-card-dark">
               <h3>Total Countries</h3>
@@ -54,18 +49,14 @@ const ContinentPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Map Section */}
           <div className="continent-map-container">
-            {/* Placeholder azul claro como na imagem */}
             <div className="map-placeholder-blue"></div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Countries List */}
         <div className="right-column">
           <h2>Countries in Europe</h2>
 
-          {/* Search & Sort Bar */}
           <div className="list-controls">
             <input 
               type="text" 
@@ -80,12 +71,10 @@ const ContinentPage: React.FC = () => {
             </select>
           </div>
 
-          {/* List of Countries */}
           <div className="countries-list">
             {countriesData.map((country, index) => (
               <Link to={`/countries`} key={index} className="country-item-card">
                 <div className="country-info-wrapper">
-                  {/* Bandeira redonda/quadrada */}
                   <img 
                     src={`https://flagcdn.com/w80/${country.code}.png`} 
                     alt={country.name} 
@@ -101,7 +90,6 @@ const ContinentPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Pagination */}
           <div className="pagination-simple">
             <button className="nav-btn">← Previous</button>
             <span>Page 1 of 9</span>

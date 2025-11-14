@@ -1,7 +1,7 @@
 import React from 'react';
 
 const CityPage: React.FC = () => {
-  // Dados simulados de Paris (igual à imagem)
+  // Dados simulados de Paris
   const cityData = {
     name: "Paris",
     country: "France",
@@ -19,12 +19,10 @@ const CityPage: React.FC = () => {
 
   return (
     <div className="page-container">
-       {/* Breadcrumbs */}
        <div className="breadcrumbs">
         Home <span>/</span> Countries <span>/</span> {cityData.country} <span>/</span> <span className="current">{cityData.name}</span>
       </div>
 
-      {/* Hero Section com Imagem de Fundo */}
       <div 
         className="city-hero" 
         style={{ backgroundImage: `url(${cityData.imageUrl})` }}
@@ -35,7 +33,6 @@ const CityPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Abas de Navegação (Visual apenas) */}
       <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
         <span style={{ color: 'var(--primary-accent)', fontWeight: '600', borderBottom: '2px solid var(--primary-accent)', paddingBottom: '1rem', marginBottom: '-1.1rem' }}>Overview</span>
         <span style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Demographics</span>
@@ -46,7 +43,6 @@ const CityPage: React.FC = () => {
 
       <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Overview</h2>
 
-      {/* Grid de Estatísticas (Cards Escuros/Azuis) */}
       <div className="city-stats-grid">
         <div className="stat-box">
           <div className="stat-box-header">👥 Population</div>
@@ -79,7 +75,6 @@ const CityPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Seção do Mapa */}
       <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Location</h2>
       <div className="map-container" style={{ height: '300px', minHeight: '300px', marginTop: '0' }}>
         <div className="map-placeholder" style={{ 

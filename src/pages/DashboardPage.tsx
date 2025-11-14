@@ -3,13 +3,11 @@ import React from 'react';
 const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-layout">
-      {/* A Navbar agora vem do arquivo Navbar.tsx global, não precisa estar aqui */}
 
       <div className="dashboard-content">
         <h1>Dashboard</h1>
 
         <div className="stats-cards">
-          {/* ... Seus cards continuam iguais ... */}
           <div className="card">
             <h3>Total Countries</h3>
             <p>195</p>
@@ -53,7 +51,6 @@ const Dashboard: React.FC = () => {
                 <td>2 hours ago</td>
                 <td><span className="status status-syncing">Syncing</span></td>
               </tr>
-              {/* ... Outras linhas da tabela ... */}
             </tbody>
           </table>
         </div>

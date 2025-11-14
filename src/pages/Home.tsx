@@ -5,7 +5,6 @@ const Home: React.FC = () => {
   return (
     <div className="page-container landing-page">
       
-      {/* Seção Hero: Apresentação Principal */}
       <section className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">Bem-vindo ao <span className="highlight">OrbX</span></h1>
@@ -25,7 +24,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Seção de Recursos do Projeto */}
       <div className="features-grid">
         <div className="card feature-card">
           <div className="feature-icon">🌍</div>
@@ -46,7 +44,6 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Seção Sobre o Projeto */}
       <section className="about-section">
         <div className="card">
           <h2>Sobre o Projeto</h2>

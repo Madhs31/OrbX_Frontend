@@ -2,8 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const CountryPage: React.FC = () => {
-  // Simulação de dados (Para ficar igual à imagem)
-  // No futuro, você buscaria isso via ID: api.getCountry(id)
   const countryData = {
     name: "Japan",
     description: "Japan is an island country in East Asia. It is situated in the northwest Pacific Ocean and is bordered on the west by the Sea of Japan, while extending from the Sea of Okhotsk in the north toward the East China Sea and Taiwan in the south.",
@@ -27,12 +25,10 @@ const CountryPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      {/* Breadcrumbs */}
       <div className="breadcrumbs">
         Home <span>/</span> Countries <span>/</span> <span className="current">{countryData.name}</span>
       </div>
 
-      {/* Header: Bandeira e Descrição */}
       <div className="country-header">
         <img src={countryData.flagUrl} alt={`Flag of ${countryData.name}`} className="country-flag-large" />
         <div className="country-header-info">
@@ -42,7 +38,6 @@ const CountryPage: React.FC = () => {
       </div>
 
       <div className="country-content-grid">
-        {/* Coluna da Esquerda: Detalhes */}
         <aside className="details-sidebar">
           <h3>Country Details</h3>
           
@@ -76,11 +71,9 @@ const CountryPage: React.FC = () => {
           </div>
         </aside>
 
-        {/* Coluna da Direita: Lista de Cidades */}
         <main className="cities-list-container">
           <div className="list-header-row">
             <h3>Cities in {countryData.name}</h3>
-            {/* Simulação de busca/filtro */}
             <div className="dash-search" style={{ width: '250px' }}>
                <span className="search-icon">🔍</span>
                <input type="text" placeholder="Search for a city..." />
@@ -99,7 +92,6 @@ const CountryPage: React.FC = () => {
             ))}
           </div>
           
-          {/* Paginação Fake */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '2rem', color: 'var(--text-muted)' }}>
             <span>‹</span> <span style={{ color: 'var(--primary-accent)' }}>1</span> <span>2</span> <span>3</span> ... <span>10</span> <span>›</span>
           </div>

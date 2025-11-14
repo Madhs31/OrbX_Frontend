@@ -7,7 +7,6 @@ import CityPage from './pages/CityPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
-// Importe a nova página de Admin aqui:
 import AdminPanel from './pages/AdminPage'; 
 import './styles/global.css';
 
@@ -25,8 +24,6 @@ function App() {
             <Route path="/login" element={<LoginPage />} /> 
             <Route path="/register" element={<RegisterPage />} /> 
             <Route path="/dashboard" element={<DashboardPage />} />
-            
-            {/* NOVA ROTA ADICIONADA: */}
             <Route path="/admin" element={<AdminPanel />} /> 
           </Routes>
         </div>
