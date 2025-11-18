@@ -4,62 +4,69 @@ import { useLocation, Link } from 'react-router-dom';
 const Navbar: React.FC = () => {
   const location = useLocation();
   
-  // Verifica se NÃO é uma página pública (Home/Login/Register).
-  const showFullNavbar = location.pathname !== '/' && 
-                         location.pathname !== '/login' && 
-                         location.pathname !== '/register';
+  const isDashboard = location.pathname !== '/' && 
+                      location.pathname !== '/login' && 
+                      location.pathname !== '/register';
 
-  // Função auxiliar para destacar o link ativo
   const getLinkClass = (path: string) => {
-    return location.pathname.startsWith(path) ? 'dash-link active' : 'dash-link';
+    return location.pathname.startsWith(path) ? 'nav-pill active' : 'nav-pill';
   };
 
-  // === VERSÃO COMPLETA (Dashboard, Países, Cidades, Admin...) ===
-  if (showFullNavbar) {
+  if (isDashboard) {
     return (
-      <nav className="dash-navbar">
-        <div className="dash-nav-left">
-          {/* Logo OrbX */}
-          <Link to="/dashboard" className="dash-brand" style={{ textDecoration: 'none' }}>
-            <div className="brand-icon"></div>
-            <span>OrbX</span>
-          </Link>
-          
-          {/* Menu de Navegação */}
-          <div className="dash-menu">
-            <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'dash-link active' : 'dash-link'}>Dashboard</Link> 
-            <Link to="/continents" className={getLinkClass('/continents')}>Continentes</Link> 
-            <Link to="/countries" className={getLinkClass('/countries')}>Países</Link> 
-            <Link to="/cities" className={getLinkClass('/cities')}>Cidades</Link> 
-            
-            {/* NOVO LINK ADICIONADO: */}
-            <Link to="/admin" className={getLinkClass('/admin')}>Admin Panel</Link>
-          </div>
-        </div>
+      <div className="floating-nav-wrapper">
+        <nav className="floating-navbar">
+            <span className="brand-text">OrbX</span>
 
-        {/* Ícones da Direita */}
-        <div className="dash-nav-right">
-          <button className="nav-icon-btn">🔔</button>
-          <button className="nav-icon-btn">⚙️</button>
+
+          <div className="nav-divider"></div>
           
-          <div className="nav-profile-avatar">
+          <div className="nav-links-group">
+            <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'nav-pill active' : 'nav-pill'}>
+              <span>📊</span> <span className="nav-label">Dash</span>
+            </Link> 
+            
+            <Link to="/continents" className={getLinkClass('/continents')}>
+              <span>🌍</span> <span className="nav-label">Mundo</span>
+            </Link> 
+            
+            <Link to="/countries" className={getLinkClass('/countries')}>
+              <span>🏳️</span> <span className="nav-label">Países</span>
+            </Link> 
+
+            <Link to="/cities" className={getLinkClass('/cities')}>
+              <span>🏙️</span> <span className="nav-label">Cidades</span>
+            </Link>
+            
+            <Link to="/admin" className={getLinkClass('/admin')}>
+              <span>🛡️</span> <span className="nav-label">Admin</span>
+            </Link>
           </div>
-        </div>
-      </nav>
+
+          <div className="nav-divider"></div>
+
+          <div className="nav-actions">
+            <div className="profile-mini" title="Perfil"></div>
+          </div>
+        </nav>
+      </div>
     );
   }
 
-  // === VERSÃO PADRÃO (Home/Login) ===
   return (
-    <nav className="navbar">
-      <Link to="/" className="nav-brand" style={{ textDecoration: 'none' }}>
-        OrbX
-      </Link>
-      {location.pathname === '/' && (
-         <div style={{ marginLeft: 'auto' }}>
-            <Link to="/login" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 500 }}>Login</Link>
-         </div>
-      )}
+    <nav className="public-navbar">
+      <div className="page-container public-nav-content">
+        <Link to="/" style={{ textDecoration: 'none', fontSize: '1.5rem', fontWeight: '800', color: '#fff' }}>
+          OrbX<span style={{ color: '#3B82F6' }}>.</span>
+        </Link>
+        
+        {location.pathname === '/' && (
+           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <Link to="/login" style={{ color: '#9CA3AF', textDecoration: 'none', fontWeight: 500 }}>Login</Link>
+              <Link to="/register" className="nav-cta">Começar Agora</Link>
+           </div>
+        )}
+      </div>
     </nav>
   );
 };

@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/ui/Navbar';
 import Home from './pages/Home';
+import ContinentsListPage from './pages/ContinentsListPage';
+import CountriesListPage from './pages/CountriesListPage';
+import CitiesListPage from './pages/CitiesListPage';
 import ContinentPage from './pages/ContinentPage';
 import CountryPage from './pages/CountryPage';
 import CityPage from './pages/CityPage';
@@ -18,9 +21,19 @@ function App() {
         <div className="container">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/continents" element={<ContinentPage />} />
-            <Route path="/countries" element={<CountryPage />} />
-            <Route path="/cities" element={<CityPage />} />
+            
+            {/* CONTINENTES */}
+            <Route path="/continents" element={<ContinentsListPage />} />
+            <Route path="/continents/:id" element={<ContinentPage />} />
+            
+            {/* PAÍSES */}
+            <Route path="/countries" element={<CountriesListPage />} />
+            <Route path="/countries/:id" element={<CountryPage />} />
+
+            {/* CIDADES */}
+            <Route path="/cities" element={<CitiesListPage />} />
+            <Route path="/cities/:id" element={<CityPage />} />
+            
             <Route path="/login" element={<LoginPage />} /> 
             <Route path="/register" element={<RegisterPage />} /> 
             <Route path="/dashboard" element={<DashboardPage />} />
