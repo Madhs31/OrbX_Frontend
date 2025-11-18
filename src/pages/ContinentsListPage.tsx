@@ -7,8 +7,6 @@ interface ContinentSummary {
   name: string;
 }
 
-const defaultMapUrl = "https://images.unsplash.com/photo-1543162312-44e05a77038a?q=80&w=2070&auto=format&fit=crop";
-
 const ContinentsListPage: React.FC = () => {
   const [continents, setContinents] = useState<ContinentSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,11 +53,6 @@ const ContinentsListPage: React.FC = () => {
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <div style={{ border: '1px solid var(--border-light)', borderRadius: '8px', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
-              <img 
-                src={defaultMapUrl} 
-                alt={continent.name} 
-                style={{ width: '100%', height: '120px', objectFit: 'cover' }} 
-              />
               <div style={{ padding: '1rem' }}>
                 <h3 style={{ margin: '0', color: 'var(--text-main)' }}>{continent.name}</h3>
                 <span style={{ color: 'var(--primary-accent)', fontSize: '0.9rem', fontWeight: '500' }}>Ver detalhes ›</span>
