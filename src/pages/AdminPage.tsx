@@ -6,6 +6,7 @@ interface Continent {
   name: string;
   area?: string;
   population?: string;
+  imageUrl?: string; 
 }
 
 interface Country {
@@ -14,6 +15,15 @@ interface Country {
   isoCode: string;
   population: string;
   continent?: { name: string }; 
+  capital: string;
+  flagUrl: string;
+  continentId: number;
+  description: string;
+  language: string;
+  currency: string;
+  area: string;
+  callingCode: string;
+  imageUrl?: string; 
 }
 
 interface City {
@@ -21,12 +31,20 @@ interface City {
   name: string;
   population: string;
   country?: { name: string };
+  latitude: string;
+  longitude: string;
+  countryId: number;
+  area: string;
+  timezone: string;
+  language: string;
+  imageUrl: string;
 }
 
 interface ContinentFormData {
   name: string;
   area: string;
   population: string;
+  imageUrl: string; 
 }
 
 interface CountryFormData {
@@ -41,6 +59,7 @@ interface CountryFormData {
   currency: string;
   area: string;
   callingCode: string;
+  imageUrl: string; 
 }
 
 interface CityFormData {
@@ -63,11 +82,13 @@ const AdminPanel: React.FC = () => {
   const [currentView, setCurrentView] = useState<AdminView>('countries');
   const [loading, setLoading] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
-  
+  const [isEditing, setIsEditing] = useState(false); // NOVO: Modo de edição
+
   // --- Estados de Dados ---
   const [data, setData] = useState<(Continent | Country | City)[]>([]); 
   const [continentsList, setContinentsList] = useState<Continent[]>([]); 
   const [countriesList, setCountriesList] = useState<Country[]>([]); 
+  const [currentItemId, setCurrentItemId] = useState<number | null>(null); // NOVO: ID do item editado
 
   // --- Estados de Modal ---
   const [isContinentModalOpen, setIsContinentModalOpen] = useState(false);
@@ -75,17 +96,21 @@ const AdminPanel: React.FC = () => {
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
 
   // --- Estados de Formulário ---
-  const [continentFormData, setContinentFormData] = useState<ContinentFormData>({
-    name: '', area: '', population: ''
-  });
-  const [countryFormData, setCountryFormData] = useState<CountryFormData>({
+  const initialContinentFormData: ContinentFormData = {
+    name: '', area: '', population: '', imageUrl: ''
+  };
+  const initialCountryFormData: CountryFormData = {
     name: '', capital: '', isoCode: '', population: '', flagUrl: '', continentId: '',
-    description: '', language: '', currency: '', area: '', callingCode: ''
-  });
-  const [cityFormData, setCityFormData] = useState<CityFormData>({
+    description: '', language: '', currency: '', area: '', callingCode: '', imageUrl: ''
+  };
+  const initialCityFormData: CityFormData = {
     name: '', latitude: '', longitude: '', population: '', countryId: '',
     area: '', timezone: '', language: '', imageUrl: ''
-  });
+  };
+
+  const [continentFormData, setContinentFormData] = useState<ContinentFormData>(initialContinentFormData);
+  const [countryFormData, setCountryFormData] = useState<CountryFormData>(initialCountryFormData);
+  const [cityFormData, setCityFormData] = useState<CityFormData>(initialCityFormData);
 
   /* ================== CARREGAMENTO DE DADOS ================== */
   
@@ -108,7 +133,12 @@ const AdminPanel: React.FC = () => {
       } else {
         response = await geoAPI.getCities({}); 
       }
-      setData(response.data);
+      const sanitizedData = response.data.map((item: any) => ({
+        ...item,
+        population: String(item.population || 0),
+        area: String(item.area || 0)
+      }));
+      setData(sanitizedData);
     } catch (error) {
       console.error(`Erro ao buscar ${currentView}`, error);
       setData([]);
@@ -120,29 +150,70 @@ const AdminPanel: React.FC = () => {
   const loadDropdownData = async () => {
     try {
       const continentsRes = await geoAPI.getContinents();
-      setContinentsList(continentsRes.data);
+      setContinentsList(continentsRes.data.map((c: any) => ({ ...c, population: String(c.population) })));
       const countriesRes = await geoAPI.getCountries();
-      setCountriesList(countriesRes.data);
+      setCountriesList(countriesRes.data.map((c: any) => ({ ...c, population: String(c.population) })));
     } catch (error) {
       console.error("Erro ao buscar dados para formulários", error);
     }
   };
 
-  /* ================== HANDLERS DE FORMULÁRIO ================== */
+  /* ================== HANDLERS DE MODAL/EDIÇÃO ================== */
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (item: Continent | Country | City | null = null) => {
     setFormError(null);
-    if (currentView === 'continents') setIsContinentModalOpen(true);
-    if (currentView === 'countries') setIsCountryModalOpen(true);
-    if (currentView === 'cities') setIsCityModalOpen(true);
+    setCurrentItemId(item ? item.id : null);
+    setIsEditing(!!item);
+
+    if (currentView === 'continents') {
+        const continentData = item ? { 
+            ...(item as Continent), 
+            population: String((item as Continent).population || ''),
+            area: String((item as Continent).area || '')
+        } : initialContinentFormData;
+        setContinentFormData(continentData as ContinentFormData);
+        setIsContinentModalOpen(true);
+    } else if (currentView === 'countries') {
+
+        const countryItem = item as Country;
+        const countryData = item ? { 
+            ...countryItem, 
+            continentId: String(countryItem.continentId),
+            population: String(countryItem.population),
+            area: String(countryItem.area || '')
+        } : initialCountryFormData;
+        setCountryFormData(countryData as CountryFormData);
+        setIsCountryModalOpen(true);
+    } else if (currentView === 'cities') {
+
+        const cityItem = item as City;
+        const cityData = item ? { 
+            ...cityItem, 
+            countryId: String(cityItem.countryId),
+            population: String(cityItem.population),
+            area: String(cityItem.area || ''),
+            latitude: String(cityItem.latitude || ''),
+            longitude: String(cityItem.longitude || ''),
+        } : initialCityFormData;
+        setCityFormData(cityData as CityFormData);
+        setIsCityModalOpen(true);
+    }
   };
+
 
   const handleCloseModals = () => {
     setIsContinentModalOpen(false);
     setIsCountryModalOpen(false);
     setIsCityModalOpen(false);
+    setIsEditing(false);
+    setCurrentItemId(null);
+    setContinentFormData(initialContinentFormData);
+    setCountryFormData(initialCountryFormData);
+    setCityFormData(initialCityFormData);
   };
 
+  /* ================== HANDLERS DE SUBMISSÃO ================== */
+  
   // --- Handlers Continente ---
   const handleContinentInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -156,13 +227,16 @@ const AdminPanel: React.FC = () => {
       setFormError('Nome é obrigatório.'); return;
     }
     try {
-      await geoAPI.createContinent(continentFormData);
+      if (isEditing && currentItemId) {
+        await geoAPI.updateContinent(currentItemId, continentFormData);
+      } else {
+        await geoAPI.createContinent(continentFormData);
+      }
       handleCloseModals();
       loadData(); 
       loadDropdownData(); 
-      setContinentFormData({ name: '', area: '', population: '' }); 
     } catch (error: any) {
-      setFormError(error.response?.data?.error || 'Erro ao salvar.');
+      setFormError(error.response?.data?.error || `Erro ao ${isEditing ? 'atualizar' : 'salvar'}.`);
     }
   };
 
@@ -179,16 +253,16 @@ const AdminPanel: React.FC = () => {
       setFormError('Nome, Código ISO e Continente são obrigatórios.'); return;
     }
     try {
-      await geoAPI.createCountry(countryFormData);
+      if (isEditing && currentItemId) {
+        await geoAPI.updateCountry(currentItemId, countryFormData);
+      } else {
+        await geoAPI.createCountry(countryFormData);
+      }
       handleCloseModals();
       loadData(); 
       loadDropdownData();
-      setCountryFormData({ 
-        name: '', capital: '', isoCode: '', population: '', flagUrl: '', continentId: '',
-        description: '', language: '', currency: '', area: '', callingCode: ''
-      });
     } catch (error: any) {
-      setFormError(error.response?.data?.error || 'Erro ao salvar.');
+      setFormError(error.response?.data?.error || `Erro ao ${isEditing ? 'atualizar' : 'salvar'}.`);
     }
   };
 
@@ -205,17 +279,43 @@ const AdminPanel: React.FC = () => {
       setFormError('Nome, País e População são obrigatórios.'); return;
     }
     try {
-      await geoAPI.createCity(cityFormData);
+      if (isEditing && currentItemId) {
+        await geoAPI.updateCity(currentItemId, cityFormData);
+      } else {
+        await geoAPI.createCity(cityFormData);
+      }
       handleCloseModals();
       loadData(); 
-      setCityFormData({ 
-        name: '', latitude: '', longitude: '', population: '', countryId: '',
-        area: '', timezone: '', language: '', imageUrl: ''
-      });
     } catch (error: any) {
-      setFormError(error.response?.data?.error || 'Erro ao salvar.');
+      setFormError(error.response?.data?.error || `Erro ao ${isEditing ? 'atualizar' : 'salvar'}.`);
     }
   };
+
+  /* ================== HANDLERS DE EXCLUSÃO ================== */
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm(`Tem certeza que deseja excluir este ${currentView.slice(0, -1)} (ID: ${id})?`)) {
+      return;
+    }
+    try {
+      if (currentView === 'continents') {
+        await geoAPI.deleteContinent(id);
+      } else if (currentView === 'countries') {
+        await geoAPI.deleteCountry(id);
+      } else if (currentView === 'cities') {
+        await geoAPI.deleteCity(id);
+      }
+      
+      setFormError(null); 
+      loadData(); 
+      loadDropdownData();
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || 'Erro ao excluir. Verifique se há itens associados.';
+      console.error(`Erro ao excluir ${currentView.slice(0, -1)}:`, errorMessage, error);
+      alert(errorMessage);
+    }
+  };
+
 
   /* ================== RENDERIZAÇÃO DA TABELA ================== */
   const renderTableHeader = () => {
@@ -253,47 +353,76 @@ const AdminPanel: React.FC = () => {
 
   const renderTableBody = () => {
     return data.map((item: any) => {
+      const formattedPopulation = Number(item.population).toLocaleString();
+      
       if (currentView === 'continents') {
+        const continentItem = item as Continent;
         return (
-          <tr key={`cont-${item.id}`}>
-            <td><strong>{item.name}</strong></td>
-            <td>{Number(item.population).toLocaleString() || '-'}</td>
-            <td>{Number(item.area).toLocaleString() || '-'}</td>
+          <tr key={`cont-${continentItem.id}`}>
+            <td><strong>{continentItem.name}</strong></td>
+            <td>{formattedPopulation || '-'}</td>
+            <td>{Number(continentItem.area).toLocaleString() || '-'}</td>
             <td>
               <div className="action-buttons">
-                <button className="btn-icon edit" title="Edit">✏️</button>
-                <button className="btn-icon delete" title="Delete">🗑️</button>
+                <button 
+                    className="btn-icon edit" 
+                    title="Edit"
+                    onClick={() => handleOpenModal(continentItem)} 
+                >✏️</button>
+                <button 
+                    className="btn-icon delete" 
+                    title="Delete"
+                    onClick={() => handleDelete(continentItem.id)} 
+                >🗑️</button>
               </div>
             </td>
           </tr>
         );
       }
       if (currentView === 'countries') {
+        const countryItem = item as Country;
         return (
-          <tr key={`country-${item.id}`}>
-            <td><strong>{item.name}</strong></td>
-            <td>{item.isoCode || '-'}</td>
-            <td>{item.continent?.name || '-'}</td>
-            <td>{Number(item.population).toLocaleString()}</td>
+          <tr key={`country-${countryItem.id}`}>
+            <td><strong>{countryItem.name}</strong></td>
+            <td>{countryItem.isoCode || '-'}</td>
+            <td>{countryItem.continent?.name || '-'}</td>
+            <td>{formattedPopulation}</td>
             <td>
               <div className="action-buttons">
-                <button className="btn-icon edit" title="Edit">✏️</button>
-                <button className="btn-icon delete" title="Delete">🗑️</button>
+                <button 
+                    className="btn-icon edit" 
+                    title="Edit"
+                    onClick={() => handleOpenModal(countryItem)} 
+                >✏️</button>
+                <button 
+                    className="btn-icon delete" 
+                    title="Delete"
+                    onClick={() => handleDelete(countryItem.id)} 
+                >🗑️</button>
               </div>
             </td>
           </tr>
         );
       }
       if (currentView === 'cities') {
+        const cityItem = item as City;
         return (
-          <tr key={`city-${item.id}`}>
-            <td><strong>{item.name}</strong></td>
-            <td>{item.country?.name || '-'}</td>
-            <td>{Number(item.population).toLocaleString()}</td>
+          <tr key={`city-${cityItem.id}`}>
+            <td><strong>{cityItem.name}</strong></td>
+            <td>{cityItem.country?.name || '-'}</td>
+            <td>{formattedPopulation}</td>
             <td>
               <div className="action-buttons">
-                <button className="btn-icon edit" title="Edit">✏️</button>
-                <button className="btn-icon delete" title="Delete">🗑️</button>
+                <button 
+                    className="btn-icon edit" 
+                    title="Edit"
+                    onClick={() => handleOpenModal(cityItem)} 
+                >✏️</button>
+                <button 
+                    className="btn-icon delete" 
+                    title="Delete"
+                    onClick={() => handleDelete(cityItem.id)} 
+                >🗑️</button>
               </div>
             </td>
           </tr>
@@ -309,12 +438,11 @@ const AdminPanel: React.FC = () => {
       <div className="dashboard-content page-container">
         <div className="admin-header">
           <div className="header-title">
-            <div className="brand-icon-small"></div>
             <h1>OrbX Admin Panel ({currentView})</h1>
           </div>
           <div className="header-actions">
-            <button className="btn-primary-action" onClick={handleOpenModal}>
-              <span className="plus-icon">+</span> Add New {currentView.slice(0, -1)}
+            <button className="btn-primary-action" onClick={() => handleOpenModal(null)}>
+              <span className="plus-icon">+</span> {isEditing ? 'Editar' : 'Adicionar Novo'} {currentView.slice(0, -1)}
             </button>
           </div>
         </div>
@@ -345,7 +473,7 @@ const AdminPanel: React.FC = () => {
           <div className="modal-content">
             <form onSubmit={handleContinentSubmit}>
               <div className="modal-header">
-                <h2>Adicionar Novo Continente</h2>
+                <h2>{isEditing ? `Editar Continente ID: ${currentItemId}` : 'Adicionar Novo Continente'}</h2>
                 <button type="button" className="modal-close-btn" onClick={handleCloseModals}>&times;</button>
               </div>
               {formError && <div className="form-error-banner">{formError}</div>}
@@ -362,23 +490,26 @@ const AdminPanel: React.FC = () => {
                   <label htmlFor="area">Área (em Milhões de km²)</label>
                   <input type="number" id="area" name="area" value={continentFormData.area} onChange={handleContinentInputChange} />
                 </div>
+                <div className="form-group">
+                  <label htmlFor="imageUrl">URL da Imagem</label>
+                  <input type="text" id="imageUrl" name="imageUrl" value={continentFormData.imageUrl} onChange={handleContinentInputChange} />
+                </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={handleCloseModals}>Cancelar</button>
-                <button type="submit" className="btn-primary-action">Salvar Continente</button>
+                <button type="submit" className="btn-primary-action">{isEditing ? 'Salvar Alterações' : 'Salvar Continente'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* --- MODAL DE PAÍSES --- */}
       {isCountryModalOpen && (
         <div className="modal-backdrop">
           <div className="modal-content large"> 
             <form onSubmit={handleCountrySubmit}>
               <div className="modal-header">
-                <h2>Adicionar Novo País</h2>
+                <h2>{isEditing ? `Editar País ID: ${currentItemId}` : 'Adicionar Novo País'}</h2>
                 <button type="button" className="modal-close-btn" onClick={handleCloseModals}>&times;</button>
               </div>
               {formError && <div className="form-error-banner">{formError}</div>}
@@ -441,23 +572,27 @@ const AdminPanel: React.FC = () => {
                 <label htmlFor="flagUrl">URL da Bandeira (opcional)</label>
                 <input type="text" id="flagUrl" name="flagUrl" placeholder="https://flagcdn.com/w640/br.png" value={countryFormData.flagUrl} onChange={handleCountryInputChange} />
               </div>
+              <div className="form-group">
+                <label htmlFor="imageUrl">URL de Imagem (do país, opcional)</label>
+                <input type="text" id="imageUrl" name="imageUrl" value={countryFormData.imageUrl} onChange={handleCountryInputChange} />
+              </div>
+
 
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={handleCloseModals}>Cancelar</button>
-                <button type="submit" className="btn-primary-action">Salvar País</button>
+                <button type="submit" className="btn-primary-action">{isEditing ? 'Salvar Alterações' : 'Salvar País'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* --- MODAL DE CIDADES --- */}
       {isCityModalOpen && (
         <div className="modal-backdrop">
           <div className="modal-content large">
             <form onSubmit={handleCitySubmit}>
               <div className="modal-header">
-                <h2>Adicionar Nova Cidade</h2>
+                <h2>{isEditing ? `Editar Cidade ID: ${currentItemId}` : 'Adicionar Nova Cidade'}</h2>
                 <button type="button" className="modal-close-btn" onClick={handleCloseModals}>&times;</button>
               </div>
               {formError && <div className="form-error-banner">{formError}</div>}
@@ -515,7 +650,7 @@ const AdminPanel: React.FC = () => {
 
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={handleCloseModals}>Cancelar</button>
-                <button type="submit" className="btn-primary-action">Salvar Cidade</button>
+                <button type="submit" className="btn-primary-action">{isEditing ? 'Salvar Alterações' : 'Salvar Cidade'}</button>
               </div>
             </form>
           </div>
