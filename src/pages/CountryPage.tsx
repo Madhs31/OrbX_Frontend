@@ -13,15 +13,15 @@ interface CountryData {
   id: number;
   name: string;
   description?: string;
-  capital: string | null;      
+  capital: string | null; 
   population: string;
   continent: { name: string };
   language?: string; 
   currency?: string;
-  area?: string;     
+  area?: string;  
   callingCode?: string;
-  flagUrl: string | null;      
-  isoCode: string | null;      
+  flagUrl: string | null; 
+  isoCode: string | null; 
   cities: City[];
   imageUrl?: string; 
 }
@@ -32,22 +32,41 @@ const CountryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [externalData, setExternalData] = useState<any>(null); 
   const defaultImageUrl = "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop"; 
+
   useEffect(() => {
-    if (id) {
+   if (id) {
       const loadData = async () => {
         try {
           setLoading(true);
-          const response = await geoAPI.getCountry(id); 
-          setData(response.data);
           
-          if (response.data.name) {
+          const response = await geoAPI.getCountry(id); 
+          let countryData = response.data; 
+          
+          if (countryData.name) {
               try {
-                  const extRes = await geoAPI.getExternalCountryInfo(response.data.name);
+                  const extRes = await geoAPI.getExternalCountryInfo(countryData.name);
                   setExternalData(extRes.data);
               } catch (extErr) {
                   console.warn("Não foi possível carregar dados externos do RestCountries", extErr);
               }
+              
+              if (!countryData.imageUrl) {
+                   try {
+                      const imageRes = await geoAPI.getImageForQuery(countryData.name);
+                      
+                      const newImageUrl = imageRes.data?.src?.landscape || imageRes.data?.src?.large;
+                      
+                      if (newImageUrl) {
+                          countryData = { ...countryData, imageUrl: newImageUrl };
+                      }
+                  } catch (imageErr) {
+                      console.warn("Não foi possível carregar imagem do Pexels", imageErr);
+                  }
+              }
           }
+          
+          setData(countryData);
+          
         } catch (error) {
           console.error("Erro ao buscar dados do país", error);
         } finally {
@@ -71,6 +90,11 @@ const CountryPage: React.FC = () => {
   const formatPopulation = (pop: string) => Number(pop).toLocaleString();
   const placeholderFlag = "https://flagcdn.com/w320/un.png"; 
 
+  const flagSource = data.isoCode 
+      ? `https://flagcdn.com/w320/${data.isoCode.toLowerCase()}.png` 
+      : placeholderFlag;
+
+
   return (
     <div className="page-container">
       <div className="breadcrumbs">
@@ -82,7 +106,7 @@ const CountryPage: React.FC = () => {
         style={{ backgroundImage: `url(${data.imageUrl || defaultImageUrl})` }}
       >
         <div className="city-hero-content">
-          <img src={data.flagUrl || placeholderFlag} alt={`Flag of ${data.name}`} style={{width: '80px', height: 'auto', borderRadius: '4px', marginBottom: '1rem', border: '1px solid #fff3'}} />
+          <img src={flagSource} alt={`Flag of ${data.name}`} style={{width: '80px', height: 'auto', borderRadius: '4px', marginBottom: '1rem', border: '1px solid #fff3'}} />
           <h1>{data.name}</h1>
           <p>{data.description || `Uma nação ${data.name} com capital em ${data.capital || 'desconhecida'}.`}</p>
         </div>
@@ -92,31 +116,31 @@ const CountryPage: React.FC = () => {
         <aside className="details-sidebar">
           <h3>Country Details</h3>
           <div className="detail-item">
-            <span className="detail-label">Capital City</span>
+            <span className="detail-label">Cidade Capital</span>
             <span className="detail-value">{data.capital || 'N/A'}</span>
           </div>
           <div className="detail-item">
-            <span className="detail-label">Population</span>
+            <span className="detail-label">População</span>
             <span className="detail-value">{formatPopulation(data.population)}</span>
           </div>
           <div className="detail-item">
-            <span className="detail-label">Continent/Region</span>
+            <span className="detail-label">Continente/Região</span>
             <span className="detail-value">{data.continent.name}</span>
           </div>
           <div className="detail-item">
-            <span className="detail-label">Official Language(s)</span>
+            <span className="detail-label">Linguagem Oficial</span>
             <span className="detail-value">{data.language || 'N/A'}</span>
           </div>
-           <div className="detail-item">
-            <span className="detail-label">Currency</span>
+          <div className="detail-item">
+            <span className="detail-label">Moeda</span>
             <span className="detail-value">{data.currency || 'N/A'}</span>
           </div>
-           <div className="detail-item">
-            <span className="detail-label">Area</span>
+          <div className="detail-item">
+            <span className="detail-label">Área</span>
             <span className="detail-value">{data.area ? `${Number(data.area).toLocaleString()} km²` : 'N/A'}</span>
           </div>
-           <div className="detail-item">
-            <span className="detail-label">Calling Code</span>
+          <div className="detail-item">
+            <span className="detail-label">Código Postal</span>
             <span className="detail-value">{data.callingCode || 'N/A'}</span>
           </div>
           
@@ -136,11 +160,7 @@ const CountryPage: React.FC = () => {
 
         <main className="cities-list-container">
           <div className="list-header-row">
-            <h3>Cities in {data.name}</h3>
-            <div className="dash-search" style={{ width: '250px' }}>
-               <span className="search-icon">🔍</span>
-               <input type="text" placeholder="Search for a city..." />
-            </div>
+            <h3>Cidades: {data.name}</h3>
           </div>
 
           <div className="cities-list">
@@ -155,9 +175,9 @@ const CountryPage: React.FC = () => {
                 <div style={{ color: 'var(--text-muted)' }}>›</div>
               </Link>
             ))}
-             {data.cities.length === 0 && (
+            {data.cities.length === 0 && (
                 <div className="city-list-item">Nenhuma cidade cadastrada.</div>
-             )}
+            )}
           </div>
         </main>
       </div> 
@@ -168,7 +188,6 @@ const CountryPage: React.FC = () => {
               <DynamicMap 
                   center={[externalData.latlng[0], externalData.latlng[1]]}
                   zoom={5} 
-                  markerText={data?.capital || data?.name}
               />
           </div>
       )}

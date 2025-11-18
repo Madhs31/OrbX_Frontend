@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { geoAPI } from '../services/api'; 
-import DynamicMap from '../components/Services/DynamicMap'; 
 
 interface Country {
   id: number;
@@ -30,6 +29,31 @@ const ContinentPage: React.FC = () => {
 
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
 
+  const getSpecificQuery = (continentName: string): string[] => {
+    switch (continentName.toLowerCase()) {
+      case 'américa do sul':
+      case 'south america':
+        return ['Andes mountains', 'Amazon rainforest', 'South America landscape'];
+      case 'américa do norte':
+      case 'north america':
+        return ['Grand Canyon', 'North America nature', 'North America cities'];
+      case 'ásia':
+      case 'asia':
+        return ['Great Wall of China', 'Himalayas', 'Asian temples', 'Asia landscape'];
+      case 'europa':
+      case 'europe':
+        return ['European capital city', 'Alps mountains', 'Europe landscape'];
+      case 'áfrica':
+      case 'africa':
+        return ['Serengeti safari', 'Sahara desert', 'African savannah'];
+      case 'oceania':
+      case 'australia':
+        return ['Great Barrier Reef', 'Sydney Opera House', 'Oceania landscape'];
+      default:
+        return [`${continentName} landscape`];
+    }
+  };
+
   useEffect(() => {
     if (id) {
       const loadData = async () => {
@@ -37,24 +61,39 @@ const ContinentPage: React.FC = () => {
           setLoading(true);
           const response = await geoAPI.getContinent(id); 
           const data: ContinentData = response.data;
-          setData(data);
+          
+          const sanitizedCountries = data.countries.map(c => ({
+            ...c,
+          }));
 
-          try {
-            const query = `${data.name} continent landscape`; // Query de busca
-            const pexelsResponse = await geoAPI.getImageForQuery(query);
-            
-            if (pexelsResponse.data?.src?.landscape) {
-              setHeroImageUrl(pexelsResponse.data.src.landscape); 
-            } else {
-              setHeroImageUrl(data.imageUrl || defaultContinentUrl); 
+          setData({ ...data, countries: sanitizedCountries });
+
+          let foundImageUrl: string | null = null;
+          const queries = getSpecificQuery(data.name);
+
+          for (const query of queries) {
+            try {
+              const pexelsResponse = await geoAPI.getImageForQuery(query);
+              if (pexelsResponse.data?.src?.landscape) {
+                foundImageUrl = pexelsResponse.data.src.landscape;
+                break; 
+              }
+            } catch (imgError) {
+              console.warn(`Pexels API falhou para a query "${query}"`);
             }
-          } catch (imgError) {
-            console.warn("Pexels API falhou, usando imagem do banco ou fallback.", imgError);
-            setHeroImageUrl(data.imageUrl || defaultContinentUrl); 
           }
+          
+          // Define a URL final
+          setHeroImageUrl(foundImageUrl || data.imageUrl || defaultContinentUrl); 
+
+          if (!foundImageUrl) {
+             console.warn("Nenhuma imagem relevante encontrada no Pexels. Usando imagem do banco ou fallback.");
+          }
+
 
         } catch (error) {
           console.error("Erro ao buscar dados do continente", error);
+          setHeroImageUrl(data?.imageUrl || defaultContinentUrl);
         } finally {
           setLoading(false);
         }
@@ -104,15 +143,15 @@ const ContinentPage: React.FC = () => {
         <div className="left-column">
           <div className="stats-grid-2x2">
             <div className="stat-card-dark">
-              <h3>Total Countries</h3>
+              <h3>Total de Paises</h3>
               <p>{data.countries?.length || 0}</p>
             </div>
             <div className="stat-card-dark">
-              <h3>Total Population</h3>
+              <h3>População Total</h3>
               <p>{formatPopulation(data.population)}</p>
             </div>
             <div className="stat-card-dark">
-              <h3>Total Area (M km²)</h3>
+              <h3>Área Total (M km²)</h3>
               <p>{Number(data.area).toLocaleString() || 0} M</p>
             </div>
             <div className="stat-card-dark">
@@ -120,27 +159,10 @@ const ContinentPage: React.FC = () => {
               <p>{data.countries?.[0]?.name || 'N/A'}</p> 
             </div>
           </div>
-
-          <div className="continent-map-container" style={{marginTop: '1.5rem'}}>
-            <h2 style={{marginBottom: '1rem', fontSize: '1.2rem'}}>Localização Central</h2>
-            
-            {(data.latitude && data.longitude) ? (
-              <DynamicMap 
-                center={[data.latitude, data.longitude]}
-                zoom={3} 
-                markerText={data.name}
-              />
-            ) : (
-              <div className="map-placeholder-blue">
-                (Mapa não disponível. Adicione lat/lon no Admin.)
-              </div>
-            )}
-            
-          </div>
         </div>
 
         <div className="right-column">
-          <h2>Countries in {data.name}</h2>
+          <h2>Países na {data.name}</h2>
            
           <div className="countries-list">
             {data.countries && data.countries.map((country) => (

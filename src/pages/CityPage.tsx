@@ -112,41 +112,40 @@ const CityPage: React.FC = () => {
       <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
         <span style={{ color: 'var(--primary-accent)', fontWeight: '600', borderBottom: '2px solid var(--primary-accent)', paddingBottom: '1rem', marginBottom: '-1.1rem' }}>Overview</span>
       </div>
-      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Overview</h2>
+      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Visão Geral</h2>
       <div className="city-stats-grid">
         <div className="stat-box">
-          <div className="stat-box-header">👥 Population</div>
+          <div className="stat-box-header">População</div>
           <div className="stat-box-value">{Number(cityData.population).toLocaleString()}</div>
         </div>
         <div className="stat-box">
-          <div className="stat-box-header">📐 Area</div>
+          <div className="stat-box-header">Área</div>
           <div className="stat-box-value">{cityData.area ? Number(cityData.area).toLocaleString() : 'N/A'}</div>
           {cityData.area && <div className="stat-box-sub">km²</div>}
         </div>
         <div className="stat-box">
-          <div className="stat-box-header">⛅ Current Weather</div>
+          <div className="stat-box-header">Tempo Atual</div>
           <div className="stat-box-value">{weatherTemp}</div>
           <div className="stat-box-sub" style={{ textTransform: 'capitalize' }}>
              {weatherDesc} <br/> Feels like {weatherFeels}°C
           </div>
         </div>
         <div className="stat-box">
-          <div className="stat-box-header">🕒 Timezone</div>
+          <div className="stat-box-header">Fuso horário</div>
           <div className="stat-box-value">{cityData.timezone || 'N/A'}</div>
         </div>
         <div className="stat-box">
-          <div className="stat-box-header">🗣️ Language</div>
+          <div className="stat-box-header">Idioma</div>
           <div className="stat-box-value">{cityData.language || 'N/A'}</div>
         </div>
       </div>
 
-      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Location</h2>
+      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Localização</h2>
       <div className="map-container" style={{ height: 'auto', minHeight: 'auto', marginTop: '0' }}>
 
         <DynamicMap 
             center={[cityData.latitude, cityData.longitude]}
             zoom={13}
-            markerText={cityData.name}
         />
       </div>
     </div>
