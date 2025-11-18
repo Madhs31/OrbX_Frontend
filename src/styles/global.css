@@ -38,14 +38,12 @@ body {
   background-color: var(--bg-page);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
 /* ========================================= */
 /* 2. LAYOUT & HELPERS                       */
 /* ========================================= */
 
-/* Container de Página Padrão */
 .page-container {
   max-width: 1280px;
   margin: 0 auto;
@@ -53,6 +51,13 @@ body {
   padding-top: 5rem; 
   padding-bottom: 4rem;
   animation: fadeInContent 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-container > div {
+    margin-bottom: 1.5rem; 
+}
+.page-container > div:last-child {
+    margin-bottom: 0;
 }
 
 @keyframes fadeInContent {
@@ -74,7 +79,7 @@ table {
 }
 
 thead tr {
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light); 
 }
 
 th {
@@ -96,6 +101,11 @@ td {
 tbody tr:last-child td {
   border-bottom: none;
 }
+.text-muted-small {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
 
 /* ========================================= */
 /* 3. COMPONENTES GLOBAIS (Botões, Status)   */
@@ -135,6 +145,30 @@ tbody tr:last-child td {
   background: rgba(255,255,255,0.05); 
 }
 
+.btn-primary-action {
+    background-color: var(--primary-accent);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px; 
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.btn-primary-action:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+.full-width-btn {
+    width: 100%;
+    margin-top: 1rem;
+}
+
 /* Badges de Status */
 .status {
   padding: 0.25rem 0.6rem;
@@ -160,7 +194,6 @@ tbody tr:last-child td {
 /* 4. NAVEGAÇÃO (Floating & Public)          */
 /* ========================================= */
 
-/* Navbar Flutuante (Dashboard) */
 .floating-nav-wrapper {
   position: fixed;
   top: 0.5rem; 
@@ -251,7 +284,7 @@ tbody tr:last-child td {
 
 /* Navbar Pública (Landing) */
 .public-navbar {
-  position: absolute; top: 0; width: 100%;
+  position: absolute; top: -50px; width: 100%;
   padding: 1rem 0; 
   z-index: 50;
 }
@@ -271,6 +304,7 @@ tbody tr:last-child td {
   border-color: transparent;
 }
 
+
 /* ========================================= */
 /* 5. PAGE: LANDING (Home)                   */
 /* ========================================= */
@@ -284,7 +318,7 @@ tbody tr:last-child td {
 }
 
 .hero-section {
-  padding: 7rem 0 4rem; 
+  padding: 12rem 0 0rem; 
   text-align: center;
   display: flex; flex-direction: column; align-items: center;
 }
@@ -308,15 +342,6 @@ tbody tr:last-child td {
 }
 
 .hero-btns { display: flex; gap: 1rem; justify-content: center; margin-bottom: 4rem; }
-
-.stats-strip {
-  display: flex; gap: 3rem; padding: 2rem; 
-  border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);
-  background: rgba(17, 24, 39, 0.3); backdrop-filter: blur(5px);
-}
-.stat-box { text-align: center; }
-.stat-num { display: block; font-size: 1.8rem; font-weight: 700; color: #fff; }
-.stat-lbl { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
 .features-section { padding: 6rem 0; }
 .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
@@ -458,17 +483,16 @@ tbody tr:last-child td {
 }
 
 /* ========================================= */
-/* 7. PAGE: DASHBOARD (NOVO)                 */
+/* 7. PAGE: DASHBOARD (ESTRUTURA COMPLETA)   */
 /* ========================================= */
 
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
 
-/* Card padrão do dashboard */
+/* Card base para os StatCards */
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
@@ -481,90 +505,153 @@ tbody tr:last-child td {
     border-color: rgba(59, 130, 246, 0.3);
     transform: translateY(-2px);
 }
-
-.card h3 {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-bottom: 0.75rem;
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.card-title-muted {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.card-value-large {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-top: 0.5rem;
+}
+.card-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-blue);
+    background-color: rgba(59, 130, 246, 0.1);
 }
 
-.card p {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-main);
+/* Estilos Específicos do Card de Status */
+.api-status-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
-
-.status-operational {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 1.5rem !important; 
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
 }
-
+.status-indicator.online {
+    color: var(--status-green);
+}
+.status-indicator.offline {
+    color: var(--status-red);
+}
 .status-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: var(--status-green);
-  box-shadow: 0 0 10px var(--status-green);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--status-green); 
+    box-shadow: 0 0 8px var(--status-green);
+    animation: pulse 1.5s infinite;
+}
+.status-indicator.offline .status-dot {
+    background-color: var(--status-red); 
+    box-shadow: 0 0 8px var(--status-red);
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.status-subtext {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
 }
 
-/* Mapa do Dashboard */
-.map-container {
-  margin-bottom: 2rem;
+/* Layout Grid para Mapa e Gráficos */
+.dashboard-grid-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
 }
 
-.map-placeholder-css {
-  width: 100%;
-  height: 400px;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-std);
-  position: relative;
-  overflow: hidden;
-  background-image: 
-    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-  box-shadow: 0 0 30px rgba(59, 130, 246, 0.1), 
-              inset 0 0 20px rgba(0,0,0,0.3);
+/* Painéis de Conteúdo (Mapa e Side-Panel) */
+.map-panel-wrapper,
+.panel-content-box {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-std);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-subtle);
 }
 
-.map-placeholder-css::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(to bottom, 
-    rgba(59, 130, 246, 0.1) 0%, 
-    rgba(59, 130, 246, 0) 100%
-  );
-  animation: mapScan 4s linear infinite;
+.map-panel-wrapper {
+    overflow: hidden;
 }
 
-@keyframes mapScan {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+.map-panel-wrapper h2, .panel-title-small {
+    font-size: 1.25rem;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+}
+.panel-title-small {
+    font-size: 1rem;
+    font-weight: 600;
+}
+.panel-text-muted {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+.chart-box {
+    margin-top: 1rem;
 }
 
-/* Tabela do Dashboard */
-.table-container {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-std);
-  padding: 1.5rem;
-  overflow-x: auto;
+/* Busca Rápida */
+.search-box-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+.search-input-dark {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    background: var(--bg-element);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    color: var(--text-main);
+    outline: none;
+    transition: border-color 0.2s;
+    font-size: 1rem;
+}
+.search-input-dark:focus {
+    border-color: var(--primary-accent);
+}
+.search-icon-svg {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
 }
 
+/* Estilos da Tabela de Cidades */
 .table-container h2 {
-  font-size: 1.25rem;
-  color: var(--text-main);
-  margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
 }
+
 
 /* ========================================= */
 /* 8. PAGE: CONTINENTES                      */
 /* ========================================= */
+
 .continent-header {
   margin-bottom: 2rem;
 }
@@ -791,6 +878,7 @@ tbody tr:last-child td {
 /* ========================================= */
 /* 9. PAGE: PAÍS (Country)                   */
 /* ========================================= */
+
 .country-header {
   display: flex;
   gap: 2rem;
@@ -943,9 +1031,11 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
+
 /* ========================================= */
 /* 10. PAGE: CIDADE (City)                   */
 /* ========================================= */
+
 .breadcrumbs {
   color: var(--text-muted);
   font-size: 0.9rem;
@@ -1062,6 +1152,9 @@ tbody tr:last-child td {
 /* ========================================= */
 /* 11. PAGE: ADMIN PANEL                     */
 /* ========================================= */
+
+/* ... Código da Página de Admin MANTIDO ... */
+
 .admin-header {
   display: flex;
   justify-content: space-between;
@@ -1475,6 +1568,11 @@ tbody tr:last-child td {
   .api-cards-grid { grid-template-columns: 1fr; }
   .filters-bar { flex-direction: column; align-items: stretch; }
   .filter-selects { overflow-x: auto; padding-bottom: 0.5rem; }
+  
+  /* Dashboard: Altera o layout principal para uma coluna */
+  .dashboard-grid-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 968px) {
@@ -1505,7 +1603,6 @@ tbody tr:last-child td {
   
   /* Landing */
   .hero-title { font-size: 2.5rem; }
-  .stats-strip { flex-direction: column; gap: 1.5rem; }
 
   /* City/Country Hero */
   .city-hero {
