@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { LogOut} from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -45,9 +46,9 @@ const Navbar: React.FC = () => {
 
           <div className="nav-divider"></div>
 
-          <div className="nav-actions">
-            <div className="profile-mini" title="Perfil"></div>
-          </div>
+          <Link to="/" className="icon-btn" title="Sair">
+                <LogOut size={20} />
+          </Link>
         </nav>
       </div>
     );
