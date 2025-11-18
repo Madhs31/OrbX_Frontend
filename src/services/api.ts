@@ -17,6 +17,7 @@ export const geoAPI = {
   getContinents: () => api.get('/api/continents'),
   getContinent: (id: number | string) => api.get(`/api/continents/${id}`),
   createContinent: (data: any) => api.post('/api/continents', data),
+  updateContinent: (id: number, data: any) => api.put(`/api/continents/${id}`, data), 
   deleteContinent: (id: number) => api.delete(`/api/continents/${id}`),
 
   // --- Countries ---
@@ -26,6 +27,7 @@ export const geoAPI = {
   },
   getCountry: (id: number | string) => api.get(`/api/countries/${id}`),
   createCountry: (data: any) => api.post('/api/countries', data),
+  updateCountry: (id: number, data: any) => api.put(`/api/countries/${id}`, data), 
   deleteCountry: (id: number) => api.delete(`/api/countries/${id}`),
 
   // --- Cities ---
@@ -34,31 +36,28 @@ export const geoAPI = {
     if (filter.countryId) {
       params = { country: filter.countryId };
     } else if (filter.continentId) {
-      params = { continent: filter.continentId };
+      params = { country: { continentId: filter.continentId } }; 
     }
     return api.get('/api/cities', { params });
   },
   getCity: (id: number | string) => api.get(`/api/cities/${id}`),
   createCity: (data: any) => api.post('/api/cities', data),
+  updateCity: (id: number, data: any) => api.put(`/api/cities/${id}`, data), 
+  deleteCity: (id: number) => api.delete(`/api/cities/${id}`), 
 
-  // --- Stats ---
   getDashboardStats: () => api.get('/api/stats/dashboard'),
 
-  // --- External ---
   getWeather: (lat: number, lon: number) => { 
     return api.get(`/api/external/weather?lat=${lat}&lon=${lon}`);
   },
    
-  // Para buscar dados extras (como coordenadas) do RestCountries
   getExternalCountryInfo: (name: string) => {
     return api.get(`/api/external/country/${encodeURIComponent(name)}`);
   },
 
-  // Para buscar imagens do Pexels
   getImageForQuery: (query: string) => {
     return api.get(`/api/external/image?q=${encodeURIComponent(query)}`);
   }
 };
 
-// Exporta a instância padrão para usar no Login/Register
 export default api;
