@@ -1,101 +1,169 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { geoAPI } from '../services/api'; 
+import DynamicMap from '../components/Services/DynamicMap'; 
 
-// Dados Mockados (Europa)
-const countriesData = [
-  { name: 'France', capital: 'Paris', code: 'fr' },
-  { name: 'Germany', capital: 'Berlin', code: 'de' },
-  { name: 'Italy', capital: 'Rome', code: 'it' },
-  { name: 'Spain', capital: 'Madrid', code: 'es' },
-  { name: 'United Kingdom', capital: 'London', code: 'gb' },
-];
+interface Country {
+  id: number;
+  name: string;
+  capital: string | null; 
+  isoCode: string | null; 
+}
+
+interface ContinentData {
+  id: number;
+  name: string;
+  description?: string; 
+  area: number; 
+  population: string; 
+  countries: Country[];
+  imageUrl?: string;    
+  latitude?: number;    
+  longitude?: number;   
+}
 
 const ContinentPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const { id } = useParams<{ id: string }>(); 
+  const [data, setData] = useState<ContinentData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const defaultContinentUrl = "https://images.unsplash.com/photo-1543162312-44e05a77038a?q=80&w=2070&auto.format&fit=crop";
+
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      const loadData = async () => {
+        try {
+          setLoading(true);
+          const response = await geoAPI.getContinent(id); 
+          const data: ContinentData = response.data;
+          setData(data);
+
+          try {
+            const query = `${data.name} continent landscape`; // Query de busca
+            const pexelsResponse = await geoAPI.getImageForQuery(query);
+            
+            if (pexelsResponse.data?.src?.landscape) {
+              setHeroImageUrl(pexelsResponse.data.src.landscape); 
+            } else {
+              setHeroImageUrl(data.imageUrl || defaultContinentUrl); 
+            }
+          } catch (imgError) {
+            console.warn("Pexels API falhou, usando imagem do banco ou fallback.", imgError);
+            setHeroImageUrl(data.imageUrl || defaultContinentUrl); 
+          }
+
+        } catch (error) {
+          console.error("Erro ao buscar dados do continente", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadData();
+    } else {
+      setLoading(false);
+    }
+  }, [id]); 
+
+  if (loading || !data) {
+    return <div className="page-container" style={{padding: '2rem'}}>Carregando...</div>;
+  }
+
+  const formatPopulation = (pop: string) => {
+    const num = Number(pop);
+    if (!num) return '0'; 
+    if (num > 1_000_000_000) return `${(num / 1_000_000_000).toFixed(1)} B`;
+    if (num > 1_000_000) return `${(num / 1_000_000).toFixed(1)} M`;
+    return num.toLocaleString();
+  };
+
+  const placeholderFlag = "https://flagcdn.com/w80/un.png";
 
   return (
     <div className="page-container">
       <div className="breadcrumbs">
-        <span>Home</span> / <span>Continents</span> / <span className="current">Europe</span>
+        <span>Home</span> / <span>Continents</span> / <span className="current">{data.name}</span>
       </div>
 
-      <div className="continent-header">
-        <h1>Europe</h1>
-        <p className="continent-desc">
-          A continent located entirely in the Northern Hemisphere and mostly in the Eastern Hemisphere, known for its rich history and cultural diversity.
-        </p>
+      <div 
+        className="city-hero" 
+        style={{ 
+          backgroundImage: `url(${heroImageUrl || ''})`,
+          backgroundColor: '#333' 
+        }}
+      >
+        <div className="city-hero-content">
+          <h1>{data.name}</h1>
+          <p className="continent-desc" style={{color: 'white', opacity: 0.9, mixBlendMode: 'difference'}}>
+            {data.description || `Um continente com uma história rica e diversidade cultural.`}
+          </p>
+        </div>
       </div>
 
-      <div className="continent-content-grid">
-        
+      <div className="continent-content-grid" style={{marginTop: '2rem'}}>
         <div className="left-column">
-          
           <div className="stats-grid-2x2">
             <div className="stat-card-dark">
               <h3>Total Countries</h3>
-              <p>44</p>
+              <p>{data.countries?.length || 0}</p>
             </div>
             <div className="stat-card-dark">
               <h3>Total Population</h3>
-              <p>746.4 M</p>
+              <p>{formatPopulation(data.population)}</p>
             </div>
             <div className="stat-card-dark">
-              <h3>Total Area (km²)</h3>
-              <p>10.18 M</p>
+              <h3>Total Area (M km²)</h3>
+              <p>{Number(data.area).toLocaleString() || 0} M</p>
             </div>
             <div className="stat-card-dark">
-              <h3>Largest Country</h3>
-              <p>Russia</p>
+              <h3>Maior País (Exemplo)</h3> 
+              <p>{data.countries?.[0]?.name || 'N/A'}</p> 
             </div>
           </div>
 
-          <div className="continent-map-container">
-            <div className="map-placeholder-blue"></div>
+          <div className="continent-map-container" style={{marginTop: '1.5rem'}}>
+            <h2 style={{marginBottom: '1rem', fontSize: '1.2rem'}}>Localização Central</h2>
+            
+            {(data.latitude && data.longitude) ? (
+              <DynamicMap 
+                center={[data.latitude, data.longitude]}
+                zoom={3} 
+                markerText={data.name}
+              />
+            ) : (
+              <div className="map-placeholder-blue">
+                (Mapa não disponível. Adicione lat/lon no Admin.)
+              </div>
+            )}
+            
           </div>
         </div>
 
         <div className="right-column">
-          <h2>Countries in Europe</h2>
-
-          <div className="list-controls">
-            <input 
-              type="text" 
-              placeholder="Search country..." 
-              className="search-input-dark"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <select className="sort-select-dark">
-              <option>Sort by Name</option>
-              <option>Sort by Population</option>
-            </select>
-          </div>
-
+          <h2>Countries in {data.name}</h2>
+           
           <div className="countries-list">
-            {countriesData.map((country, index) => (
-              <Link to={`/countries`} key={index} className="country-item-card">
+            {data.countries && data.countries.map((country) => (
+              <Link to={`/countries/${country.id}`} key={country.id} className="country-item-card">
                 <div className="country-info-wrapper">
-                  <img 
-                    src={`https://flagcdn.com/w80/${country.code}.png`} 
-                    alt={country.name} 
+                  <img
+                    src={country.isoCode ? `https://flagcdn.com/w80/${country.isoCode.toLowerCase()}.png` : placeholderFlag}
+                    alt={country.name}
                     className="country-flag-thumb"
                   />
                   <div className="country-text">
                     <span className="c-name">{country.name}</span>
-                    <span className="c-capital">{country.capital}</span>
+                    <span className="c-capital">{country.capital || 'N/A'}</span>
                   </div>
                 </div>
                 <div className="chevron-icon">›</div>
               </Link>
             ))}
+            
+            {data.countries.length === 0 && (
+              <p style={{padding: '1rem', color: 'var(--text-muted)'}}>Nenhum país cadastrado para este continente.</p>
+            )}
           </div>
-
-          <div className="pagination-simple">
-            <button className="nav-btn">← Previous</button>
-            <span>Page 1 of 9</span>
-            <button className="nav-btn">Next →</button>
-          </div>
-
         </div>
       </div>
     </div>
